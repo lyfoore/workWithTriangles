@@ -35,17 +35,39 @@ void Model::load(char *fname)
         Vertex v2(buffer + 24, i);
         Vertex v3(buffer + 36, i);
 
-        all_vertexes.push_back(v1);
-        all_vertexes.push_back(v2);
-        all_vertexes.push_back(v3);
+        // adding vertixes to the all_vertixes vector
+        m_all_vertexes.push_back(v1);
+        m_all_vertexes.push_back(v2);
+        m_all_vertexes.push_back(v3);
 
+        // adding indexes of vertexes to the face
         Face triangle;
         triangle.m_vertexes.push_back(3 * i);
         triangle.m_vertexes.push_back(3 * i + 1);
         triangle.m_vertexes.push_back(3 * i + 2);
+
+        // adding face to the all_faces vector
+        m_all_faces.push_back(triangle);
     }
     file.close();
 };
+
+void Model::getMinMax() {
+
+    m_xMax = 1e-10;     m_xMin = 1e10;
+    m_yMax = 1e-10;     m_yMin = 1e10;
+    m_zMax = 1e-10;     m_zMin = 1e10;
+
+    for (unsigned long i = 0; i < m_faceN * 3; i++) {
+        if (m_all_vertexes[i].m_x < m_xMin) m_xMin = m_all_vertexes[i].m_x;
+        if (m_all_vertexes[i].m_y < m_yMin) m_yMin = m_all_vertexes[i].m_y;
+        if (m_all_vertexes[i].m_z < m_zMin) m_zMin = m_all_vertexes[i].m_z;
+
+        if (m_all_vertexes[i].m_x > m_xMax) m_xMax = m_all_vertexes[i].m_x;
+        if (m_all_vertexes[i].m_y > m_yMax) m_yMax = m_all_vertexes[i].m_y;
+        if (m_all_vertexes[i].m_z > m_zMax) m_zMax = m_all_vertexes[i].m_z;
+    }
+}
 
 double Vertex::getDistFromInit()
 {
@@ -123,6 +145,8 @@ int main()
     Model model;
     char *path = "D:\\projects\\workWithTriangles\\stl_files\\dodeca_half_a.stl";
     model.load(path);
+    model.getMinMax();
+    std::cout << "x_min - " << model.m_xMin << std::endl;
 
     return 0;
 }

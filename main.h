@@ -26,12 +26,14 @@ public:
 class Model
 {
 public:
+    double m_xMax, m_yMax, m_zMax, m_xMin, m_yMin, m_zMin;
     unsigned long m_faceN;
     char m_faceNchar[4];
     char header[80];
-    std::vector<Vertex> all_vertexes;
-    std::vector<Face> all_faces;
+    std::vector<Vertex> m_all_vertexes;
+    std::vector<Face> m_all_faces;
     void load(char *fname);
+    void getMinMax();
 };
 
 
