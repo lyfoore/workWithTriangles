@@ -67,6 +67,38 @@ void Model::getMinMax() {
         if (m_all_vertexes[i].m_y > m_yMax) m_yMax = m_all_vertexes[i].m_y;
         if (m_all_vertexes[i].m_z > m_zMax) m_zMax = m_all_vertexes[i].m_z;
     }
+    // finding the minimum between three dimensionals
+    m_minSize = 1e10;
+    for (int i = 0; i < 3; i++) {
+        if ((m_xMax - m_xMin) < m_minSize) m_minSize = m_xMax - m_xMin;
+        if ((m_yMax - m_yMin) < m_minSize) m_minSize = m_yMax - m_yMin;
+        if ((m_zMax - m_zMin) < m_minSize) m_minSize = m_zMax - m_zMin;
+    }
+}
+
+void Model::deleting_twins() {
+    for (long i = m_all_vertexes.size(); i > 0; i--) {
+        for (long j = i - 1; j >= 0; j--) {
+            // std::cout << i << " " << j << std::endl;
+            if (difference(m_all_vertexes[i], m_all_vertexes[j]) < m_minSize * PRECIZE) {
+                // std::cout << "catch!" << std::endl;
+                for (int k = 0; k < m_all_vertexes[k].m_faces.size(); k++) {
+                    // adding information about connected faces from deleting vertex to the equal vertex
+                    m_all_vertexes[j].m_faces.push_back(m_all_vertexes[i].m_faces[k]);
+                    // editing information about vertexes connected with faces
+                    for (int n = 0; n < 3; n++) {
+                        if (m_all_faces[i / 3].m_vertexes[n] == i) {
+                            m_all_faces[i / 3].m_vertexes[n] = j;
+                            break;
+                        }
+                    }
+                }
+                // deleting one of the equals vertexes from all_vertexes vector
+                m_all_vertexes.erase(m_all_vertexes.begin() + i);
+                break;
+            }
+        }
+    }
 }
 
 double Vertex::getDistFromInit()
@@ -102,51 +134,15 @@ double difference(Vertex a, Vertex b)
                 pow(b.m_z - a.m_z, 2));
 }
 
-std::vector<Vertex> merging(std::vector<Vertex> vector)
-{
-    for (int i = 0; i < vector.size(); i++)
-    {
-        for (int j = i; j < vector.size(); j++)
-        {
-            if (difference(vector[i], vector[j]) < SIZE * PRECIZE)
-            {
-                return vector; // не доделал
-            }
-        }
-    }
-}
-
 int main()
 {
-    // Point a1{1, 1, 1, 1};
-    // Point a2{10, 4, 3, 2};
-    // Point a3{9, 5, 2, 3};
-    // Point b1{0, 4, 5, 4};
-    // Point b2{10, 0, 3, 5};
-    // Point b3{6, 4, 6, 6};
-    // int n = 5;
-    // std::vector<Point> vec = {a1, a2, a3, b1, b2, b3};
-    // for (auto now : vec)
-    // {
-    //     std::cout << now.number << " ";
-    // }
-    // std::cout << std::endl;
-    // std::sort(vec.begin(), vec.end(), comparison);
-    // for (auto now : vec)
-    // {
-    //     std::cout << now.number << " ";
-    // }
-    // std::cout << std::endl;
-    // for (auto now : vec)
-    // {
-    //     std::cout << now.getDistFromInit() << " ";
-    // }
-    // SIZE = vec[vec.size() - 1].getDistFromInit() * 2;
     Model model;
-    char *path = "D:\\projects\\workWithTriangles\\stl_files\\dodeca_half_a.stl";
+    char *path = "D:\\projects\\workWithTriangles\\stl_files\\tetrahedron.stl";
     model.load(path);
     model.getMinMax();
     std::cout << "x_min - " << model.m_xMin << std::endl;
-
+    std::cout << "before deleting twins - " << model.m_all_vertexes.size() << std::endl;
+    model.deleting_twins();
+    std::cout << "after deleting twins - " << model.m_all_vertexes.size() << std::endl;
     return 0;
 }

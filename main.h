@@ -27,6 +27,7 @@ class Model
 {
 public:
     double m_xMax, m_yMax, m_zMax, m_xMin, m_yMin, m_zMin;
+    double m_minSize;
     unsigned long m_faceN;
     char m_faceNchar[4];
     char header[80];
@@ -34,7 +35,7 @@ public:
     std::vector<Face> m_all_faces;
     void load(char *fname);
     void getMinMax();
+    void deleting_twins();
 };
 
-
-
+double difference(Vertex a, Vertex b);
