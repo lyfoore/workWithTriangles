@@ -6,11 +6,13 @@
 #include <string.h>
 
 #include "main.h"
+#include "display/GUI.h"
 
 // using namespace std;
 
 const double PRECIZE = 0.01 / 100; //0.01%
 double SIZE;
+GUI* g_gui;
 
 void Model::load(char *fname)
 {
@@ -134,7 +136,7 @@ double difference(Vertex a, Vertex b)
                 pow(b.m_z - a.m_z, 2));
 }
 
-int main()
+int main(int argc, char **argv)
 {
     Model model;
 
@@ -149,5 +151,9 @@ int main()
     std::cout << "before deleting twins - " << model.m_all_vertexes.size() << std::endl;
     model.deleting_twins();
     std::cout << "after deleting twins - " << model.m_all_vertexes.size() << std::endl;
+
+    g_gui=new GUI();
+    g_gui->init(argc,argv);
+
     return 0;
 }
