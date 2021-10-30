@@ -12,7 +12,8 @@
 
 const double PRECIZE = 0.01 / 100; //0.01%
 double SIZE;
-GUI* g_gui;
+GUI gui;
+Model model;
 
 void Model::load(char *fname)
 {
@@ -78,18 +79,25 @@ void Model::getMinMax() {
     }
 }
 
-void Model::deleting_twins() {
-    for (long i = m_all_vertexes.size(); i > 0; i--) {
-        for (long j = i - 1; j >= 0; j--) {
+void Model::deleting_twins()
+{
+    for (int i = m_all_vertexes.size(); i > 0; i--)
+    {
+        for (int j = i - 1; j >= 0; j--)
+        {
             // std::cout << i << " " << j << std::endl;
-            if (difference(m_all_vertexes[i], m_all_vertexes[j]) < m_minSize * PRECIZE) {
+            if (difference(m_all_vertexes[i], m_all_vertexes[j]) < m_minSize * PRECIZE)
+            {
                 // std::cout << "catch!" << std::endl;
-                for (int k = 0; k < m_all_vertexes[k].m_faces.size(); k++) {
+                for (int k = 0; k < m_all_vertexes[k].m_faces.size(); k++)
+                {
                     // adding information about connected faces from deleting vertex to the equal vertex
                     m_all_vertexes[j].m_faces.push_back(m_all_vertexes[i].m_faces[k]);
                     // editing information about vertexes connected with faces
-                    for (int n = 0; n < 3; n++) {
-                        if (m_all_faces[i / 3].m_vertexes[n] == i) {
+                    for (int n = 0; n < 3; n++)
+                    {
+                        if (m_all_faces[i / 3].m_vertexes[n] == i)
+                        {
                             m_all_faces[i / 3].m_vertexes[n] = j;
                             break;
                         }
@@ -138,8 +146,6 @@ double difference(Vertex a, Vertex b)
 
 int main(int argc, char **argv)
 {
-    Model model;
-
     char dir[1024],file_mod[1024];
     sprintf(dir,"%s",__FILE__);
     dir[strlen(dir)-9]=0; //hack to get source directory
@@ -152,8 +158,7 @@ int main(int argc, char **argv)
     model.deleting_twins();
     std::cout << "after deleting twins - " << model.m_all_vertexes.size() << std::endl;
 
-    g_gui=new GUI();
-    g_gui->init(argc,argv);
+    gui.init(argc,argv);
 
     return 0;
 }
