@@ -75,10 +75,10 @@ void display()
 
 //    glBegin(GL_TRIANGLES);
 
-//    glColor3f(1., 0., 0.);
-//    glVertex3d(0., 1., 0);
-//    glVertex3d(-1., -1., 0.);
-//    glVertex3d(1., -1., 0.);
+//    glColor3f(10., 0., 0.);
+//    glVertex3d(0., 10., 0);
+//    glVertex3d(-10., -10., 0.);
+//    glVertex3d(-10., -10., 0.);
 
 //    glEnd();
 

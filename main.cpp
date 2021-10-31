@@ -81,30 +81,41 @@ void Model::getMinMax() {
 
 void Model::deleting_twins()
 {
-    for (int i = m_all_vertexes.size(); i > 0; i--)
+    for (int i = m_all_vertexes.size() - 1; i > 0; i--)
     {
         for (int j = i - 1; j >= 0; j--)
         {
-            // std::cout << i << " " << j << std::endl;
             if (difference(m_all_vertexes[i], m_all_vertexes[j]) < m_minSize * PRECIZE)
             {
-                // std::cout << "catch!" << std::endl;
-                for (int k = 0; k < m_all_vertexes[k].m_faces.size(); k++)
+                // editing faces of vertexes
+                for(int k = 0; k < m_all_vertexes[i].m_faces.size(); k++)
                 {
-                    // adding information about connected faces from deleting vertex to the equal vertex
                     m_all_vertexes[j].m_faces.push_back(m_all_vertexes[i].m_faces[k]);
-                    // editing information about vertexes connected with faces
-                    for (int n = 0; n < 3; n++)
+
+                    // editing vertexes of faces
+                    for (int l = 0; l < 3; l++)
                     {
-                        if (m_all_faces[i / 3].m_vertexes[n] == i)
+                        if (m_all_faces[m_all_vertexes[i].m_faces[k]].m_vertexes[l] == i)
                         {
-                            m_all_faces[i / 3].m_vertexes[n] = j;
+                            m_all_faces[m_all_vertexes[i].m_faces[k]].m_vertexes[l] = j;
                             break;
                         }
                     }
                 }
-                // deleting one of the equals vertexes from all_vertexes vector
+
+                // deleting element
                 m_all_vertexes.erase(m_all_vertexes.begin() + i);
+
+                // fixing trouble with deleting (transition indexes of vertexes by -1 after deleting)
+                for (int m = 0; m < m_all_faces.size(); m++)
+                {
+                    for (int n = 0; n < 3; n++)
+                    {
+                        if (m_all_faces[m].m_vertexes[n] > i)
+                            m_all_faces[m].m_vertexes[n] -= 1;
+                    }
+                }
+
                 break;
             }
         }
