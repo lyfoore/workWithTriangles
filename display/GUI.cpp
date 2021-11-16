@@ -7,8 +7,13 @@
 #include <iostream>
 
 extern Model model;
+const int N_CELLS = 100;
+extern double distances2D[N_CELLS][N_CELLS][3];
+extern const double Z_PLANE;
 
 void display();
+
+void draw_distance();
 
 void color()
 {
@@ -116,6 +121,7 @@ void display()
 
     for (int i = 0; i < model.m_all_faces.size(); i++)
     {
+        glColor3f(1., 1., 1.);
         glBegin(GL_TRIANGLES);
         for (int j = 0; j < 3; j++)
         {
@@ -125,6 +131,8 @@ void display()
         }
         glEnd();
     }
+
+    draw_distance();
 
 //    glBegin(GL_TRIANGLES);
 
@@ -162,4 +170,18 @@ void timer(int)
 //    if (x_pos >= -9. || x_pos <= -20.)
 //        state *= -1;
 //    x_pos += state * 0.2;
+}
+
+void draw_distance()
+{
+    glBegin(GL_POINTS);
+    for (int i = 0; i < N_CELLS; i++)
+    {
+        for (int j = 0; j < N_CELLS; j++)
+        {
+            glColor3f(1. * distances2D[i][j][2] / model.m_minSize * 4, 0., 0.);
+            glVertex3f(distances2D[i][j][0], distances2D[i][j][1], Z_PLANE);
+        }
+    }
+    glEnd();
 }

@@ -3,7 +3,7 @@
 
 #include "model.h"
 
-double distance_point_vertex(double x, double y, Vertex vertex);
+double distance_point_vertex(double x, double y, double z, Vertex vertex);
 
 void get_distance_vertex();
 

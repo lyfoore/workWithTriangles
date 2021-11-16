@@ -29,7 +29,7 @@ class Model
 {
 public:
     double m_xMax, m_yMax, m_zMax, m_xMin, m_yMin, m_zMin;
-    double m_minSize;
+    double m_minSize, m_maxSize;
     unsigned long m_faceN;
     char m_faceNchar[4];
     char header[80];
