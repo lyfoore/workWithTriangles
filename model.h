@@ -7,6 +7,8 @@
 #include <fstream>
 #include <string.h>
 
+//extern const int N_CELLS;
+
 class Vertex
 {
 public:

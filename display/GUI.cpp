@@ -30,6 +30,7 @@ float rx0 = 0;
 float ry0 = 0;
 float mx0 = 0;
 float my0 = 0;
+float scale_k = 1;
 
 float mouse_x=0.0;
 float mouse_y=0.0;
@@ -49,7 +50,7 @@ void m_m(int x,int y) //mouse move
 
 
 //mouse down
-void m_d(int button, int state,int x, int y)  //mouse down
+void m_d(int button, int state, int x, int y)  //mouse down
 {
 
     if (state==GLUT_UP)
@@ -65,11 +66,23 @@ void m_d(int button, int state,int x, int y)  //mouse down
         my0=y;
 
     }
+
 //    double W_WIDTH=W_HEIGHT*(w_x1-w_x0)/(w_y1-w_y0);
 //    mouse_x=(1.0*x)/W_WIDTH;
 
 //    mouse_y=(W_HEIGHT-(1.0*y))/W_HEIGHT;
 
+    glutPostRedisplay();
+}
+
+void keyboardFunc (int key, int x, int y)
+{
+    if (key == GLUT_KEY_UP)
+        // zoom in
+        scale_k += 0.1;
+    if (key == GLUT_KEY_DOWN)
+        // zoom out
+        scale_k -= 0.1;
     glutPostRedisplay();
 }
 
@@ -94,6 +107,7 @@ void GUI::init(int argc, char **argv)
 //    glutTimerFunc(0, timer, 0);
     glutMotionFunc(m_m);
     glutMouseFunc(m_d);
+    glutSpecialFunc(keyboardFunc);
 
     glEnable(GL_DEPTH_TEST);
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -114,6 +128,7 @@ void display()
 
     // translation
     glTranslatef(10., 0., -110.);
+    glScalef(scale_k, scale_k, scale_k);
     glRotatef(rx, 0., 1., 0.);
     glRotatef(ry, 1., 0., 0.);
 
@@ -121,7 +136,7 @@ void display()
 
     for (int i = 0; i < model.m_all_faces.size(); i++)
     {
-        glColor3f(1., 1., 1.);
+        glColor3f(0.7, 0.7, 0.7);
         glBegin(GL_TRIANGLES);
         for (int j = 0; j < 3; j++)
         {
@@ -179,7 +194,7 @@ void draw_distance()
     {
         for (int j = 0; j < N_CELLS; j++)
         {
-            glColor3f(1. * distances2D[i][j][2] / model.m_minSize * 4, 0., 0.);
+            glColor3f(1. * distances2D[i][j][2] / model.m_minSize * 5, 0., 0.);
             glVertex3f(distances2D[i][j][0], distances2D[i][j][1], Z_PLANE);
         }
     }
