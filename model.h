@@ -1,6 +1,8 @@
+#ifndef MODEL_H
+#define MODEL_H
+
 #include <iostream>
 #include <vector>
-#include <algorithm>
 #include <cmath>
 #include <fstream>
 #include <string.h>
@@ -36,6 +38,10 @@ public:
     void load(char *fname);
     void getMinMax();
     void deleting_twins();
+    void distribution2D();
 };
 
 double difference(Vertex a, Vertex b);
+
+
+#endif // MODEL_H
