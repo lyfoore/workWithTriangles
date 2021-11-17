@@ -159,13 +159,78 @@ double difference(Vertex a, Vertex b)
 }
 
 
-void Model::distribution2D() {
+void Model::distribution2D()
+{
 //    double distr[N_CELLS][N_CELLS][3]; // [3] == [x, y, distance]
     for (int i = 0; i < N_CELLS; i++) {
         for (int j = 0; j < N_CELLS; j++) {
             distances2D[i][j][0] = m_xMin + ((m_xMax - m_xMin) * i) / N_CELLS;
             distances2D[i][j][1] = m_yMin + ((m_yMax - m_yMin) * j) / N_CELLS;
 //            std::cout << distances2D[i][j][0] << ' ' << distances2D[i][j][1] << std::endl;
+        }
+    }
+}
+
+
+bool consistsIn(int item, std::vector<int> vector)
+{
+    for (int i = 0; i < vector.size(); i++)
+    {
+        if (item == vector[i])
+            return 1;
+    }
+    return 0;
+}
+
+
+void Model::getEdges()
+{
+    // go over the all vertixes
+    for (int i = 0; i < m_all_vertexes.size(); i++)
+    {
+        // make temporary vector for each vertex to hold another vertexes for avoiding repetitions
+        std::vector<int> temp;
+        // go over all triangles that has "i" vertex
+        for (int j = 0; j < m_all_vertexes[i].m_faces.size(); j++)
+        {
+            // go over the all vertixes inside of triangle
+            for (int k = 0; k < 3; k++)
+            {
+                // ignore all vertexes with index that smaller than "i" for avoiding repetitions (all edges for vertexes with indexes < "i" already exists)
+                if (m_all_faces[ m_all_vertexes[i].m_faces[j] ].m_vertexes[k] > i && !(consistsIn(m_all_faces[ m_all_vertexes[i].m_faces[j] ].m_vertexes[k], temp)))
+                    temp.push_back(m_all_faces[ m_all_vertexes[i].m_faces[j] ].m_vertexes[k]);
+            }
+        }
+        if (!(temp.empty()))
+        {
+            // go over the all temp == go over the all edges for "i" vertex
+            for (int l = 0; l < temp.size(); l++)
+            {
+                Edge edge;
+                // connect edge with vertex indexes
+                edge.m_vertexes.push_back(i);
+                edge.m_vertexes.push_back(temp[l]);
+
+                m_all_edges.push_back(edge);
+
+                // finding triangles with this edge
+                for (int m = 0; m < m_all_vertexes[i].m_faces.size(); m++)
+                {
+                    // if temp[l] consists in the triangle with "i" vertex
+                    if (consistsIn(temp[l], m_all_faces[ m_all_vertexes[i].m_faces[m] ].m_vertexes))
+                    {
+                        // connect edge with faces indexes
+                        m_all_edges[m_all_edges.size() - 1].m_faces.push_back(m_all_vertexes[i].m_faces[m]);
+
+                        // connect triangle with edge indexes
+                        m_all_faces[ m_all_vertexes[i].m_faces[m] ].m_edges.push_back(m_all_edges.size() - 1);
+
+                        // connect vertexes with edge indexes
+                        m_all_vertexes[i].m_edges.push_back(m_all_edges.size() - 1);
+                        m_all_vertexes[temp[l]].m_edges.push_back(m_all_edges.size() - 1);
+                    }
+                }
+            }
         }
     }
 }

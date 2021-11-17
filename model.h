@@ -17,6 +17,7 @@ public:
     double m_z;
     int number;
     std::vector<int> m_faces;
+    std::vector<int> m_edges;
     double getDistFromInit();
     Vertex(char *facet, int i);
 };
@@ -25,6 +26,14 @@ class Face
 {
 public:
     std::vector<int> m_vertexes;
+    std::vector<int> m_edges;
+};
+
+class Edge
+{
+public:
+    std::vector<int> m_vertexes;
+    std::vector<int> m_faces;
 };
 
 class Model
@@ -37,10 +46,12 @@ public:
     char header[80];
     std::vector<Vertex> m_all_vertexes;
     std::vector<Face> m_all_faces;
+    std::vector<Edge> m_all_edges;
     void load(char *fname);
     void getMinMax();
     void deleting_twins();
     void distribution2D();
+    void getEdges();
 };
 
 double difference(Vertex a, Vertex b);

@@ -15,6 +15,8 @@ void display();
 
 void draw_distance();
 
+void draw_model_by_edges();
+
 void color()
 {
     glClearColor(0.0, 0.0, 0.0, 1.0);
@@ -31,6 +33,7 @@ float ry0 = 0;
 float mx0 = 0;
 float my0 = 0;
 float scale_k = 1;
+float blur_k = 4;
 
 float mouse_x=0.0;
 float mouse_y=0.0;
@@ -83,6 +86,11 @@ void keyboardFunc (int key, int x, int y)
     if (key == GLUT_KEY_DOWN)
         // zoom out
         scale_k -= 0.1;
+    if (key == GLUT_KEY_LEFT)
+        blur_k += 0.1;
+    if (key == GLUT_KEY_RIGHT)
+        blur_k -= 0.1;
+
     glutPostRedisplay();
 }
 
@@ -134,18 +142,20 @@ void display()
 
 //    draw
 
-    for (int i = 0; i < model.m_all_faces.size(); i++)
-    {
-        glColor3f(0.7, 0.7, 0.7);
-        glBegin(GL_TRIANGLES);
-        for (int j = 0; j < 3; j++)
-        {
-            glVertex3d(model.m_all_vertexes[ model.m_all_faces[i].m_vertexes[j] ].m_x,
-                       model.m_all_vertexes[ model.m_all_faces[i].m_vertexes[j] ].m_y,
-                       model.m_all_vertexes[ model.m_all_faces[i].m_vertexes[j] ].m_z);
-        }
-        glEnd();
-    }
+//    for (int i = 0; i < model.m_all_faces.size(); i++)
+//    {
+//        glColor3f(0.7, 0.7, 0.7);
+//        glBegin(GL_TRIANGLES);
+//        for (int j = 0; j < 3; j++)
+//        {
+//            glVertex3d(model.m_all_vertexes[ model.m_all_faces[i].m_vertexes[j] ].m_x,
+//                       model.m_all_vertexes[ model.m_all_faces[i].m_vertexes[j] ].m_y,
+//                       model.m_all_vertexes[ model.m_all_faces[i].m_vertexes[j] ].m_z);
+//        }
+//        glEnd();
+//    }
+
+    draw_model_by_edges();
 
     draw_distance();
 
@@ -194,8 +204,24 @@ void draw_distance()
     {
         for (int j = 0; j < N_CELLS; j++)
         {
-            glColor3f(1. * distances2D[i][j][2] / model.m_minSize * 5, 0., 0.);
+            glColor3f(1. * distances2D[i][j][2] / model.m_minSize * blur_k, 0., 0.);
             glVertex3f(distances2D[i][j][0], distances2D[i][j][1], Z_PLANE);
+        }
+    }
+    glEnd();
+}
+
+void draw_model_by_edges()
+{
+    glColor3f(0.7, 0.7, 0.7);
+    glBegin(GL_LINES);
+    for (int i = 0; i < model.m_all_edges.size(); i++)
+    {
+        for (int j = 0; j < 2; j++)
+        {
+            glVertex3f( model.m_all_vertexes[model.m_all_edges[i].m_vertexes[j]].m_x,
+                        model.m_all_vertexes[model.m_all_edges[i].m_vertexes[j]].m_y,
+                        model.m_all_vertexes[model.m_all_edges[i].m_vertexes[j]].m_z);
         }
     }
     glEnd();

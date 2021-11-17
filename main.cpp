@@ -31,6 +31,14 @@ int main(int argc, char **argv)
     model.deleting_twins();
     std::cout << "after deleting twins - " << model.m_all_vertexes.size() << std::endl;
 
+    model.getEdges();
+    std::cout << "number of edges - "<< model.m_all_edges.size() << std:: endl;
+
+    for (int l = 0; l < model.m_all_edges.size(); l++)
+    {
+//        std::cout << model.m_all_edges[l].m_vertexes[0] << ' ' << model.m_all_edges[l].m_vertexes[1] << std::endl;
+    }
+
     Z_PLANE = (model.m_zMax - model.m_zMin) / 2;
     model.distribution2D();
     get_distance_vertex();
