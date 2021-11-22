@@ -42,6 +42,7 @@ int main(int argc, char **argv)
     Z_PLANE = (model.m_zMax - model.m_zMin) / 2;
     model.distribution2D();
     get_distance_vertex();
+    get_distance(0., 0.);
 
     for (int i = 0; i < N_CELLS; i++)
     {

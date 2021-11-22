@@ -79,29 +79,51 @@ std::vector<std::vector<double>> get_rotation_matrix(double alpha, int axis)
 
 double get_distance(double x, double y)
 {
-    // go over at all triangles
+    // go over the all triangles
     for (int i = 0; i < model.m_all_faces.size(); i++)
     {
-        Point p1 = {model.m_all_vertexes[model.m_all_faces[i].m_vertexes[0]].m_x,
+        Point point0 = {model.m_all_vertexes[model.m_all_faces[i].m_vertexes[0]].m_x,
                     model.m_all_vertexes[model.m_all_faces[i].m_vertexes[0]].m_y,
                     model.m_all_vertexes[model.m_all_faces[i].m_vertexes[0]].m_z};
 
-        // get mean of two ponts of triangle
-        Point p2 = {(model.m_all_vertexes[model.m_all_faces[i].m_vertexes[1]].m_x + model.m_all_vertexes[model.m_all_faces[i].m_vertexes[2]].m_x)/2,
-                    (model.m_all_vertexes[model.m_all_faces[i].m_vertexes[1]].m_y + model.m_all_vertexes[model.m_all_faces[i].m_vertexes[2]].m_y)/2,
-                    (model.m_all_vertexes[model.m_all_faces[i].m_vertexes[1]].m_z + model.m_all_vertexes[model.m_all_faces[i].m_vertexes[2]].m_z)/2};
+        Point point1 = {model.m_all_vertexes[model.m_all_faces[i].m_vertexes[1]].m_x,
+                    model.m_all_vertexes[model.m_all_faces[i].m_vertexes[1]].m_y,
+                    model.m_all_vertexes[model.m_all_faces[i].m_vertexes[1]].m_z};
 
-        // calc the angle between two points and Oy
-
-        // rotate around Oy
-
-        // calc the angle between two points and Oz
-
-        // rotate around Oz
+        Point point2 = {model.m_all_vertexes[model.m_all_faces[i].m_vertexes[2]].m_x,
+                    model.m_all_vertexes[model.m_all_faces[i].m_vertexes[2]].m_y,
+                    model.m_all_vertexes[model.m_all_faces[i].m_vertexes[2]].m_z};
 
         // calc the angle between two points and Ox
+        double alpha = atan((point1.m_y - point0.m_y)/(point1.m_z - point0.m_z));
+        if (point1.m_z < point0.m_z) alpha += M_PI;
 
         // rotate around Ox
+        Point point0_new =  {point0.m_x - point0.m_x, point0.m_y - point0.m_y, point0.m_z - point0.m_z};
+        Point point1_new =  {point1.m_x - point0.m_x, point1.m_y - point0.m_y, point1.m_z - point0.m_z};
+        Point point2_new =  {point2.m_x - point0.m_x, point2.m_y - point0.m_y, point2.m_z - point0.m_z};
+
+        point0_new = multiply_matrix_point( get_rotation_matrix(alpha, 1), point0_new );
+        point1_new = multiply_matrix_point( get_rotation_matrix(alpha, 1), point1_new );
+        point2_new = multiply_matrix_point( get_rotation_matrix(alpha, 1), point2_new );
+
+        // calc the angle between two points and Oy
+        double gamma = atan((point1_new.m_x - point0_new.m_x)/(point1_new.m_z - point0_new.m_z));
+        gamma *= -1;
+
+        // rotate around Oy
+        point0_new = multiply_matrix_point( get_rotation_matrix(gamma, 2), point0_new );
+        point1_new = multiply_matrix_point( get_rotation_matrix(gamma, 2), point1_new );
+        point2_new = multiply_matrix_point( get_rotation_matrix(gamma, 2), point2_new );
+
+        // calc the angle between two points and Oz
+        double beta = atan((point2_new.m_x - point1_new.m_x)/(point2_new.m_y - point1_new.m_y));
+        if (point2_new.m_y < 0) beta += M_PI;
+
+        // rotate around Oz
+        point0_new = multiply_matrix_point( get_rotation_matrix(beta, 3), point0_new );
+        point1_new = multiply_matrix_point( get_rotation_matrix(beta, 3), point1_new );
+        point2_new = multiply_matrix_point( get_rotation_matrix(beta, 3), point2_new );
     }
 
 }

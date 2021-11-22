@@ -7,7 +7,6 @@
 #include <my_include/glu.h>
 #include <my_include/glut.h>
 #include <iostream>
-#include <random>
 
 extern Model model;
 const int N_CELLS = 100;
@@ -242,9 +241,10 @@ void draw_triangle()
 
     Point point0 = {-5., 1., 0.};
     Point point1 = {2., -6., -7.};
-    Point point2 = {1., 0., 9.};
+    Point point2 = {1., 0., -9.};
 
     double alpha = atan((point1.m_y - point0.m_y)/(point1.m_z - point0.m_z));
+    if (point1.m_z < point0.m_z) alpha += M_PI;
 //    alpha *= -1;
 //    std::cout << alpha << std::endl;
 
@@ -267,6 +267,7 @@ void draw_triangle()
 
     double beta = atan((point2_new.m_x - point1_new.m_x)/(point2_new.m_y - point1_new.m_y));
 //    beta *= -1;
+    if (point2_new.m_y < 0) beta += M_PI;
 
     point0_new = multiply_matrix_point( get_rotation_matrix(beta, 3), point0_new );
     point1_new = multiply_matrix_point( get_rotation_matrix(beta, 3), point1_new );
