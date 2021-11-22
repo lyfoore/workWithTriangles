@@ -273,6 +273,41 @@ void draw_triangle()
     point1_new = multiply_matrix_point( get_rotation_matrix(beta, 3), point1_new );
     point2_new = multiply_matrix_point( get_rotation_matrix(beta, 3), point2_new );
 
+    // points for normals in vertexes
+    Point p01, p02, p10, p12, p20, p21; // first number - vertex index, second number - neighbour index
+
+    // get normal equations
+    double k02 = (point2_new.m_y - point0_new.m_y)/(point2_new.m_z - point0_new.m_z);
+    k02 = 1/k02 * (-1);
+
+    p02 = {0., -0.5 * k02, -0.5};
+    p20 = {0., (point2_new.m_z - 0.5) * k02 + point2_new.m_y - k02 * point2_new.m_z, point2_new.m_z - 0.5};
+
+    double k12 = (point2_new.m_y - point1_new.m_y)/(point2_new.m_z - point1_new.m_z);
+    k12 = 1/k12 * (-1);
+
+    p21 = {0., (point2_new.m_z + 0.5) * k12 + point2_new.m_y - k12 * point2_new.m_z, point2_new.m_z + 0.5};
+    p12 = {0., (point1_new.m_z + 0.5) * k12 + point1_new.m_y - k12 * point1_new.m_z, point1_new.m_z + 0.5};
+
+    p01 = {0., point0_new.m_y - 0.5, point0_new.m_z};
+    p10 = {0., point1_new.m_y - 0.5, point1_new.m_z};
+
+    glColor3f(0.7, 0.7, 0.7);
+    glBegin(GL_LINES);
+    glVertex3d(point0_new.m_x, point0_new.m_y, point0_new.m_z);
+    glVertex3d(p02.m_x, p02.m_y, p02.m_z);
+    glVertex3d(point2_new.m_x, point2_new.m_y, point2_new.m_z);
+    glVertex3d(p20.m_x, p20.m_y, p20.m_z);
+    glVertex3d(point2_new.m_x, point2_new.m_y, point2_new.m_z);
+    glVertex3d(p21.m_x, p21.m_y, p21.m_z);
+    glVertex3d(point1_new.m_x, point1_new.m_y, point1_new.m_z);
+    glVertex3d(p12.m_x, p12.m_y, p12.m_z);
+    glVertex3d(point0_new.m_x, point0_new.m_y, point0_new.m_z);
+    glVertex3d(p01.m_x, p01.m_y, p01.m_z);
+    glVertex3d(point1_new.m_x, point1_new.m_y, point1_new.m_z);
+    glVertex3d(p10.m_x, p10.m_y, p10.m_z);
+    glEnd();
+
 
     glColor3f(0.7, 0.7, 0.7);
     glBegin(GL_TRIANGLES);

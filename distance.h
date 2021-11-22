@@ -8,7 +8,7 @@ double distance_point_vertex(double x, double y, double z, Vertex vertex);
 
 void get_distance_vertex();
 
-double get_distance(double x, double y);
+double get_distance(double x, double y, double z);
 
 Point multiply_matrix_point(std::vector<std::vector<double>> A, Point point);
 

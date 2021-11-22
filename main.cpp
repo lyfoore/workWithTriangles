@@ -40,9 +40,8 @@ int main(int argc, char **argv)
     }
 
     Z_PLANE = (model.m_zMax - model.m_zMin) / 2;
-    model.distribution2D();
-    get_distance_vertex();
-    get_distance(0., 0.);
+//    model.distribution2D();
+//    get_distance_vertex();
 
     for (int i = 0; i < N_CELLS; i++)
     {
@@ -52,7 +51,7 @@ int main(int argc, char **argv)
         }
     }
 
-    double dist = get_distance(0, 0);
+    double dist = get_distance(0, 0, 0);
 
 //    std::vector<std::vector<double>> temp;
 

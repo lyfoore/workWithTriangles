@@ -76,8 +76,20 @@ std::vector<std::vector<double>> get_rotation_matrix(double alpha, int axis)
     return temp;
 }
 
+int edge_equation(double z, double y, double Z1, double Y1, double Z2, double Y2)
+{
+    // E(x, y) = (z - Z)dY - (y - Y)dZ
+    double dZ = Z2 - Z1;
+    double dY = Y2 - Y1;
+    double res = (z - Z1) * dY - (y - Y1) * dZ;
 
-double get_distance(double x, double y)
+    if (res > 0) return 1;
+    if (res < 0) return -1;
+    if (res == 0) return 0;
+}
+
+
+double get_distance(double x, double y, double z)
 {
     // go over the all triangles
     for (int i = 0; i < model.m_all_faces.size(); i++)
@@ -124,6 +136,44 @@ double get_distance(double x, double y)
         point0_new = multiply_matrix_point( get_rotation_matrix(beta, 3), point0_new );
         point1_new = multiply_matrix_point( get_rotation_matrix(beta, 3), point1_new );
         point2_new = multiply_matrix_point( get_rotation_matrix(beta, 3), point2_new );
+
+        // points for normals in vertexes
+        Point p01, p02, p10, p12, p20, p21; // first number - vertex index, second number - neighbour index
+
+        // get normal equations
+        double k02 = (point2_new.m_y - point0_new.m_y)/(point2_new.m_z - point0_new.m_z);
+        k02 = 1/k02 * (-1);
+
+        p02 = {0., -0.5 * k02, -0.5};
+        p20 = {0., (point2_new.m_z - 0.5) * k02 + point2_new.m_y - k02 * point2_new.m_z, point2_new.m_z - 0.5};
+
+        double k12 = (point2_new.m_y - point1_new.m_y)/(point2_new.m_z - point1_new.m_z);
+        k12 = 1/k12 * (-1);
+
+        p21 = {0., (point2_new.m_z + 0.5) * k12 + point2_new.m_y - k12 * point2_new.m_z, point2_new.m_z + 0.5};
+        p12 = {0., (point1_new.m_z + 0.5) * k12 + point1_new.m_y - k12 * point1_new.m_z, point1_new.m_z + 0.5};
+
+        // for z-axis k = 0
+        p01 = {0., point0_new.m_y - 0.5, point0_new.m_z};
+        p10 = {0., point1_new.m_y - 0.5, point1_new.m_z};
+
+        double lines[9][4] = {{point0_new.m_y, point0_new.m_z, point2_new.m_y, point2_new.m_z},
+                              {point2_new.m_y, point2_new.m_z, point1_new.m_y, point1_new.m_z},
+                              {point1_new.m_y, point1_new.m_z, point0_new.m_y, point0_new.m_z},
+                              {point0_new.m_y, point0_new.m_z, p01.m_y, p01.m_z},
+                              {point0_new.m_y, point0_new.m_z, p02.m_y, p02.m_z},
+                              {point2_new.m_y, point2_new.m_z, p21.m_y, p21.m_z},
+                              {point2_new.m_y, point2_new.m_z, p20.m_y, p20.m_z},
+                              {point1_new.m_y, point1_new.m_z, p10.m_y, p10.m_z},
+                              {point1_new.m_y, point1_new.m_z, p12.m_y, p12.m_z}};
+
+        std::vector<int> results;
+        for (int i = 0; i < 9; i++)
+        {
+            results.push_back(edge_equation(z, y, lines[i][1], lines[i][0], lines[i][3], lines[i][2]));
+        }
+
+        //
     }
 
 }
