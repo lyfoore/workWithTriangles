@@ -51,6 +51,14 @@ int main(int argc, char **argv)
         }
     }
 
+    double dist = get_distance(0, 0);
+
+//    std::vector<std::vector<double>> temp;
+
+//    temp[3][5] = 5.;
+
+//    std::cout << temp[3][5] << std::endl;
+
     gui.init(argc,argv);
 
     return 0;

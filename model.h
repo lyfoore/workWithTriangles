@@ -56,5 +56,13 @@ public:
 
 double difference(Vertex a, Vertex b);
 
+class Point
+{
+public:
+    double m_x;
+    double m_y;
+    double m_z;
+};
+
 
 #endif // MODEL_H

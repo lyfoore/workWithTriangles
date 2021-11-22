@@ -1,10 +1,13 @@
 #include "GUI.h"
 #include "model.h"
+#include "distance.h"
 
+#include <cmath>
 #include <my_include/gl.h>
 #include <my_include/glu.h>
 #include <my_include/glut.h>
 #include <iostream>
+#include <random>
 
 extern Model model;
 const int N_CELLS = 100;
@@ -16,6 +19,9 @@ void display();
 void draw_distance();
 
 void draw_model_by_edges();
+
+void draw_triangle();
+void draw_origin();
 
 void color()
 {
@@ -155,9 +161,12 @@ void display()
 //        glEnd();
 //    }
 
-    draw_model_by_edges();
+//    draw_model_by_edges();
 
-    draw_distance();
+//    draw_distance();
+
+    draw_origin();
+    draw_triangle();
 
 //    glBegin(GL_TRIANGLES);
 
@@ -224,5 +233,70 @@ void draw_model_by_edges()
                         model.m_all_vertexes[model.m_all_edges[i].m_vertexes[j]].m_z);
         }
     }
+    glEnd();
+}
+
+
+void draw_triangle()
+{
+
+    Point point0 = {-5., 1., 0.};
+    Point point1 = {2., -6., -7.};
+    Point point2 = {1., 0., 9.};
+
+    double alpha = atan((point1.m_y - point0.m_y)/(point1.m_z - point0.m_z));
+//    alpha *= -1;
+//    std::cout << alpha << std::endl;
+
+    Point point0_new =  {point0.m_x - point0.m_x, point0.m_y - point0.m_y, point0.m_z - point0.m_z};
+    Point point1_new =  {point1.m_x - point0.m_x, point1.m_y - point0.m_y, point1.m_z - point0.m_z};
+    Point point2_new =  {point2.m_x - point0.m_x, point2.m_y - point0.m_y, point2.m_z - point0.m_z};
+
+    point0_new = multiply_matrix_point( get_rotation_matrix(alpha, 1), point0_new );
+    point1_new = multiply_matrix_point( get_rotation_matrix(alpha, 1), point1_new );
+    point2_new = multiply_matrix_point( get_rotation_matrix(alpha, 1), point2_new );
+
+
+    double gamma = atan((point1_new.m_x - point0_new.m_x)/(point1_new.m_z - point0_new.m_z));
+    gamma *= -1;
+
+    point0_new = multiply_matrix_point( get_rotation_matrix(gamma, 2), point0_new );
+    point1_new = multiply_matrix_point( get_rotation_matrix(gamma, 2), point1_new );
+    point2_new = multiply_matrix_point( get_rotation_matrix(gamma, 2), point2_new );
+
+
+    double beta = atan((point2_new.m_x - point1_new.m_x)/(point2_new.m_y - point1_new.m_y));
+//    beta *= -1;
+
+    point0_new = multiply_matrix_point( get_rotation_matrix(beta, 3), point0_new );
+    point1_new = multiply_matrix_point( get_rotation_matrix(beta, 3), point1_new );
+    point2_new = multiply_matrix_point( get_rotation_matrix(beta, 3), point2_new );
+
+
+    glColor3f(0.7, 0.7, 0.7);
+    glBegin(GL_TRIANGLES);
+    glVertex3f(point0_new.m_x, point0_new.m_y, point0_new.m_z);
+    glVertex3f(point1_new.m_x, point1_new.m_y, point1_new.m_z);
+    glVertex3f(point2_new.m_x, point2_new.m_y, point2_new.m_z);
+
+    glVertex3f(point0.m_x, point0.m_y, point0.m_z);
+    glVertex3f(point1.m_x, point1.m_y, point1.m_z);
+    glVertex3f(point2.m_x, point2.m_y, point2.m_z);
+    glEnd();
+}
+
+void draw_origin()
+{
+
+    glBegin(GL_LINES);
+    glColor3f(1., 0., 0.);
+    glVertex3f(0., 0., 0.);
+    glVertex3f(1., 0., 0.);
+    glColor3f(0., 1., 0.);
+    glVertex3f(0., 0., 0.);
+    glVertex3f(0., 1., 0.);
+    glColor3f(0., 0., 1.);
+    glVertex3f(0., 0., 0.);
+    glVertex3f(0., 0., 1.);
     glEnd();
 }
