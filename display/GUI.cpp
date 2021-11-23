@@ -160,12 +160,12 @@ void display()
 //        glEnd();
 //    }
 
-//    draw_model_by_edges();
+    draw_model_by_edges();
 
-//    draw_distance();
+    draw_distance();
 
     draw_origin();
-    draw_triangle();
+//    draw_triangle();
 
 //    glBegin(GL_TRIANGLES);
 
@@ -238,40 +238,54 @@ void draw_model_by_edges()
 
 void draw_triangle()
 {
+    int i = 0;
+    Point point0 = {model.m_all_vertexes[model.m_all_faces[i].m_vertexes[0]].m_x,
+                model.m_all_vertexes[model.m_all_faces[i].m_vertexes[0]].m_y,
+                model.m_all_vertexes[model.m_all_faces[i].m_vertexes[0]].m_z};
 
-    Point point0 = {-5., 1., 0.};
-    Point point1 = {2., -6., -7.};
-    Point point2 = {1., 0., -9.};
+    Point point1 = {model.m_all_vertexes[model.m_all_faces[i].m_vertexes[1]].m_x,
+                model.m_all_vertexes[model.m_all_faces[i].m_vertexes[1]].m_y,
+                model.m_all_vertexes[model.m_all_faces[i].m_vertexes[1]].m_z};
 
+    Point point2 = {model.m_all_vertexes[model.m_all_faces[i].m_vertexes[2]].m_x,
+                model.m_all_vertexes[model.m_all_faces[i].m_vertexes[2]].m_y,
+                model.m_all_vertexes[model.m_all_faces[i].m_vertexes[2]].m_z};
+    Point xyz = {0., 0., 0.};
+
+    // calc the angle between two points and Ox
     double alpha = atan((point1.m_y - point0.m_y)/(point1.m_z - point0.m_z));
     if (point1.m_z < point0.m_z) alpha += M_PI;
-//    alpha *= -1;
-//    std::cout << alpha << std::endl;
 
+    // rotate around Ox
     Point point0_new =  {point0.m_x - point0.m_x, point0.m_y - point0.m_y, point0.m_z - point0.m_z};
     Point point1_new =  {point1.m_x - point0.m_x, point1.m_y - point0.m_y, point1.m_z - point0.m_z};
     Point point2_new =  {point2.m_x - point0.m_x, point2.m_y - point0.m_y, point2.m_z - point0.m_z};
+    Point xyz_new = {xyz.m_x - point0.m_x, xyz.m_y - point0.m_y, xyz.m_z - point0.m_z};
 
     point0_new = multiply_matrix_point( get_rotation_matrix(alpha, 1), point0_new );
     point1_new = multiply_matrix_point( get_rotation_matrix(alpha, 1), point1_new );
     point2_new = multiply_matrix_point( get_rotation_matrix(alpha, 1), point2_new );
+    xyz_new = multiply_matrix_point( get_rotation_matrix(alpha, 1), xyz_new );
 
-
+    // calc the angle between two points and Oy
     double gamma = atan((point1_new.m_x - point0_new.m_x)/(point1_new.m_z - point0_new.m_z));
     gamma *= -1;
 
+    // rotate around Oy
     point0_new = multiply_matrix_point( get_rotation_matrix(gamma, 2), point0_new );
     point1_new = multiply_matrix_point( get_rotation_matrix(gamma, 2), point1_new );
     point2_new = multiply_matrix_point( get_rotation_matrix(gamma, 2), point2_new );
+    xyz_new = multiply_matrix_point( get_rotation_matrix(gamma, 2), xyz_new );
 
-
+    // calc the angle between two points and Oz
     double beta = atan((point2_new.m_x - point1_new.m_x)/(point2_new.m_y - point1_new.m_y));
-//    beta *= -1;
     if (point2_new.m_y < 0) beta += M_PI;
 
+    // rotate around Oz
     point0_new = multiply_matrix_point( get_rotation_matrix(beta, 3), point0_new );
     point1_new = multiply_matrix_point( get_rotation_matrix(beta, 3), point1_new );
     point2_new = multiply_matrix_point( get_rotation_matrix(beta, 3), point2_new );
+    xyz_new = multiply_matrix_point( get_rotation_matrix(beta, 3), xyz_new );
 
     // points for normals in vertexes
     Point p01, p02, p10, p12, p20, p21; // first number - vertex index, second number - neighbour index
@@ -289,10 +303,41 @@ void draw_triangle()
     p21 = {0., (point2_new.m_z + 0.5) * k12 + point2_new.m_y - k12 * point2_new.m_z, point2_new.m_z + 0.5};
     p12 = {0., (point1_new.m_z + 0.5) * k12 + point1_new.m_y - k12 * point1_new.m_z, point1_new.m_z + 0.5};
 
+    // for z-axis k = 0
     p01 = {0., point0_new.m_y - 0.5, point0_new.m_z};
     p10 = {0., point1_new.m_y - 0.5, point1_new.m_z};
 
+    double lines[9][4] = {{point0_new.m_y, point0_new.m_z, point2_new.m_y, point2_new.m_z}, // 0
+                          {point2_new.m_y, point2_new.m_z, point1_new.m_y, point1_new.m_z}, // 1
+                          {point1_new.m_y, point1_new.m_z, point0_new.m_y, point0_new.m_z}, // 2
+                          {point0_new.m_y, point0_new.m_z, p01.m_y, p01.m_z},               // 3
+                          {point0_new.m_y, point0_new.m_z, p02.m_y, p02.m_z},               // 4
+                          {point2_new.m_y, point2_new.m_z, p21.m_y, p21.m_z},               // 5
+                          {point2_new.m_y, point2_new.m_z, p20.m_y, p20.m_z},               // 6
+                          {point1_new.m_y, point1_new.m_z, p10.m_y, p10.m_z},               // 7
+                          {point1_new.m_y, point1_new.m_z, p12.m_y, p12.m_z}};              // 8
+
+    std::vector<int> results;
+    for (int i = 0; i < 9; i++)
+    {
+        results.push_back(edge_equation(xyz_new.m_z, xyz_new.m_y, lines[i][1], lines[i][0], lines[i][3], lines[i][2]));
+//            std::cout << results[i] << std::endl;
+    }
+
+    if (results[0] > 0 && results[1] > 0 && results[2] > 0) std::cout << abs(xyz_new.m_x) << std::endl;
+    if (results[0] < 0 && results[4] > 0 && results[6] < 0) std::cout << sqrt(pow(get_distance_point_line_2D(xyz_new, point0_new, point2_new), 2) + pow(xyz_new.m_x, 2)) << std::endl;
+    if (results[1] < 0 && results[5] > 0 && results[8] < 0) std::cout << sqrt(pow(get_distance_point_line_2D(xyz_new, point2_new, point1_new), 2) + pow(xyz_new.m_x, 2)) << std::endl;
+    if (results[2] < 0 && results[7] > 0 && results[3] < 0) std::cout << sqrt(pow(get_distance_point_line_2D(xyz_new, point1_new, point0_new), 2) + pow(xyz_new.m_x, 2)) << std::endl;
+    if (results[4] < 0 && results[3] > 0) std::cout << get_distance_point_point(point0_new, xyz_new) << std::endl;
+    if (results[5] < 0 && results[6] > 0) std::cout << get_distance_point_point(point2_new, xyz_new) << std::endl;
+    if (results[7] < 0 && results[8] > 0) std::cout << get_distance_point_point(point1_new, xyz_new) << std::endl;
+
+
     glColor3f(0.7, 0.7, 0.7);
+    glBegin(GL_POINTS);
+    glVertex3d(xyz.m_x, xyz.m_y, xyz.m_z);
+    glVertex3d(xyz_new.m_x, xyz_new.m_y, xyz_new.m_z);
+    glEnd();
     glBegin(GL_LINES);
     glVertex3d(point0_new.m_x, point0_new.m_y, point0_new.m_z);
     glVertex3d(p02.m_x, p02.m_y, p02.m_z);

@@ -34,30 +34,29 @@ int main(int argc, char **argv)
     model.getEdges();
     std::cout << "number of edges - "<< model.m_all_edges.size() << std:: endl;
 
-    for (int l = 0; l < model.m_all_edges.size(); l++)
-    {
+//    for (int l = 0; l < model.m_all_edges.size(); l++)
+//    {
 //        std::cout << model.m_all_edges[l].m_vertexes[0] << ' ' << model.m_all_edges[l].m_vertexes[1] << std::endl;
-    }
+//    }
 
     Z_PLANE = (model.m_zMax - model.m_zMin) / 2;
-//    model.distribution2D();
+    model.distribution2D();
+    get_distance_field();
 //    get_distance_vertex();
 
-    for (int i = 0; i < N_CELLS; i++)
-    {
-        for (int j = 0; j < N_CELLS; j++)
-        {
+//    for (int i = 0; i < N_CELLS; i++)
+//    {
+//        for (int j = 0; j < N_CELLS; j++)
+//        {
 //            std::cout << distances2D[i][j][0] << ' ' << distances2D[i][j][1] << ' ' <<  distances2D[i][j][2] << std::endl;
-        }
-    }
+//        }
+//    }
 
-    double dist = get_distance(0, 0, 0);
+//    double dist = get_distance(22.3233, 28.7363, Z_PLANE);
+
+//    std::cout << "dist = " << dist << std::endl;
 
 //    std::vector<std::vector<double>> temp;
-
-//    temp[3][5] = 5.;
-
-//    std::cout << temp[3][5] << std::endl;
 
     gui.init(argc,argv);
 

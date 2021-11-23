@@ -14,4 +14,12 @@ Point multiply_matrix_point(std::vector<std::vector<double>> A, Point point);
 
 std::vector<std::vector<double>> get_rotation_matrix(double alpha, int axis);
 
+int edge_equation(double z, double y, double Z1, double Y1, double Z2, double Y2);
+
+double get_distance_point_line_2D(Point point, Point line1, Point line2);
+
+double get_distance_point_point(Point point1, Point point2);
+
+void get_distance_field();
+
 #endif // DISTANCE_H
