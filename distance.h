@@ -22,4 +22,6 @@ double get_distance_point_point(Point point1, Point point2);
 
 void get_distance_field();
 
+std::vector<std::vector<double>> multiply_matrixes(std::vector<std::vector<double>> A, std::vector<std::vector<double>> B);
+
 #endif // DISTANCE_H

@@ -7,6 +7,7 @@
 
 #include "model.h"
 #include "display/GUI.h"
+#include "distance.h"
 
 const double PRECIZE = 0.01 / 100; //0.01%
 double SIZE;
@@ -233,4 +234,118 @@ void Model::getEdges()
             }
         }
     }
+}
+
+
+void Model::init_matrixes()
+{
+    double alpha;
+    double gamma;
+    double beta;
+
+    // points for normals in vertexes
+    Point p01, p02, p10, p12, p20, p21; // first number - vertex index, second number - neighbour index
+
+    double k02;
+    double k12;
+
+    for (int i = 0; i < m_all_faces.size(); i++)
+    {
+        Point point0;
+        Point point1;
+        Point point2;
+        std::vector<std::vector<double>> rot_matrix;
+
+        point0 = {m_all_vertexes[m_all_faces[i].m_vertexes[0]].m_x,
+                  m_all_vertexes[m_all_faces[i].m_vertexes[0]].m_y,
+                  m_all_vertexes[m_all_faces[i].m_vertexes[0]].m_z};
+
+        point1 = {m_all_vertexes[m_all_faces[i].m_vertexes[1]].m_x,
+                  m_all_vertexes[m_all_faces[i].m_vertexes[1]].m_y,
+                  m_all_vertexes[m_all_faces[i].m_vertexes[1]].m_z};
+
+        point2 = {m_all_vertexes[m_all_faces[i].m_vertexes[2]].m_x,
+                  m_all_vertexes[m_all_faces[i].m_vertexes[2]].m_y,
+                  m_all_vertexes[m_all_faces[i].m_vertexes[2]].m_z};
+
+        // calc the angle between two points and Ox
+        alpha = atan((point1.m_y - point0.m_y)/(point1.m_z - point0.m_z));
+        if (point1.m_z < point0.m_z) alpha += M_PI;
+
+        // rotate around Ox
+        Point point0_new =  {point0.m_x - point0.m_x, point0.m_y - point0.m_y, point0.m_z - point0.m_z};
+        Point point1_new =  {point1.m_x - point0.m_x, point1.m_y - point0.m_y, point1.m_z - point0.m_z};
+        Point point2_new =  {point2.m_x - point0.m_x, point2.m_y - point0.m_y, point2.m_z - point0.m_z};
+
+        point0_new = multiply_matrix_point( get_rotation_matrix(alpha, 1), point0_new );
+        point1_new = multiply_matrix_point( get_rotation_matrix(alpha, 1), point1_new );
+        point2_new = multiply_matrix_point( get_rotation_matrix(alpha, 1), point2_new );
+
+        // calc the angle between two points and Oy
+        gamma = atan((point1_new.m_x - point0_new.m_x)/(point1_new.m_z - point0_new.m_z));
+        gamma *= -1;
+
+        // rotate around Oy
+        point0_new = multiply_matrix_point( get_rotation_matrix(gamma, 2), point0_new );
+        point1_new = multiply_matrix_point( get_rotation_matrix(gamma, 2), point1_new );
+        point2_new = multiply_matrix_point( get_rotation_matrix(gamma, 2), point2_new );
+
+        // calc the angle between two points and Oz
+        beta = atan((point2_new.m_x - point1_new.m_x)/(point2_new.m_y - point1_new.m_y));
+        if (point2_new.m_y < 0) beta += M_PI;
+
+        // rotate around Oz
+        point0_new = multiply_matrix_point( get_rotation_matrix(beta, 3), point0_new );
+        point1_new = multiply_matrix_point( get_rotation_matrix(beta, 3), point1_new );
+        point2_new = multiply_matrix_point( get_rotation_matrix(beta, 3), point2_new );
+
+        // get full rotation matrix
+        rot_matrix = multiply_matrixes(get_rotation_matrix(gamma, 2), get_rotation_matrix(alpha, 1));
+        rot_matrix = multiply_matrixes(get_rotation_matrix(beta, 3), rot_matrix);
+
+        m_all_faces[i].m_matrix = rot_matrix;
+
+        point0_new =  {point0.m_x - point0.m_x, point0.m_y - point0.m_y, point0.m_z - point0.m_z};
+        point1_new =  {point1.m_x - point0.m_x, point1.m_y - point0.m_y, point1.m_z - point0.m_z};
+        point2_new =  {point2.m_x - point0.m_x, point2.m_y - point0.m_y, point2.m_z - point0.m_z};
+
+        point0_new = multiply_matrix_point(rot_matrix, point0_new);
+        point1_new = multiply_matrix_point(rot_matrix, point1_new);
+        point2_new = multiply_matrix_point(rot_matrix, point2_new);
+
+
+        m_all_faces[i].m_point0_new = point0_new;
+        m_all_faces[i].m_point1_new = point1_new;
+        m_all_faces[i].m_point2_new = point2_new;
+
+        // get normal equations
+        k02 = (point2_new.m_y - point0_new.m_y)/(point2_new.m_z - point0_new.m_z);
+        k02 = 1/k02 * (-1);
+
+        p02 = {0., -0.5 * k02, -0.5};
+        p20 = {0., (point2_new.m_z - 0.5) * k02 + point2_new.m_y - k02 * point2_new.m_z, point2_new.m_z - 0.5};
+
+        k12 = (point2_new.m_y - point1_new.m_y)/(point2_new.m_z - point1_new.m_z);
+        k12 = 1/k12 * (-1);
+
+        p21 = {0., (point2_new.m_z + 0.5) * k12 + point2_new.m_y - k12 * point2_new.m_z, point2_new.m_z + 0.5};
+        p12 = {0., (point1_new.m_z + 0.5) * k12 + point1_new.m_y - k12 * point1_new.m_z, point1_new.m_z + 0.5};
+
+        // for z-axis k = 0
+        p01 = {0., point0_new.m_y - 0.5, point0_new.m_z};
+        p10 = {0., point1_new.m_y - 0.5, point1_new.m_z};
+
+//        std::vector<std::vector<double>> m_all_faces[i].lines (9, std::vector<double> (4, 0.));
+
+        m_all_faces[i].lines = {{point0_new.m_y, point0_new.m_z, point2_new.m_y, point2_new.m_z},  // 0
+                               {point2_new.m_y, point2_new.m_z, point1_new.m_y, point1_new.m_z},   // 1
+                               {point1_new.m_y, point1_new.m_z, point0_new.m_y, point0_new.m_z},   // 2
+                               {point0_new.m_y, point0_new.m_z, p01.m_y, p01.m_z},         // 3
+                               {point0_new.m_y, point0_new.m_z, p02.m_y, p02.m_z},         // 4
+                               {point2_new.m_y, point2_new.m_z, p21.m_y, p21.m_z},         // 5
+                               {point2_new.m_y, point2_new.m_z, p20.m_y, p20.m_z},         // 6
+                               {point1_new.m_y, point1_new.m_z, p10.m_y, p10.m_z},         // 7
+                               {point1_new.m_y, point1_new.m_z, p12.m_y, p12.m_z}};        // 8
+    }
+
 }

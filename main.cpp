@@ -4,6 +4,7 @@
 #include <cmath>
 #include <fstream>
 #include <string.h>
+#include <time.h>
 
 #include "model.h"
 #include "display/GUI.h"
@@ -19,6 +20,9 @@ double distances2D[N_CELLS][N_CELLS][3];  // [3] == [x, y, distance]
 
 int main(int argc, char **argv)
 {
+    time_t start, end;
+    time(&start);
+
     char dir[1024],file_mod[1024];
     sprintf(dir,"%s",__FILE__);
     dir[strlen(dir)-9]=0; //hack to get source directory
@@ -30,7 +34,8 @@ int main(int argc, char **argv)
     std::cout << "before deleting twins - " << model.m_all_vertexes.size() << std::endl;
     model.deleting_twins();
     std::cout << "after deleting twins - " << model.m_all_vertexes.size() << std::endl;
-
+    model.init_matrixes();
+    std::cout << "init finished" << std:: endl;
     model.getEdges();
     std::cout << "number of edges - "<< model.m_all_edges.size() << std:: endl;
 
@@ -57,6 +62,16 @@ int main(int argc, char **argv)
 //    std::cout << "dist = " << dist << std::endl;
 
 //    std::vector<std::vector<double>> temp;
+
+    time(&end);
+    double seconds = difftime(end, start);
+    std::cout << seconds << " seconds" << std::endl;
+
+//    std::vector<std::vector<double>> resulttt = multiply_matrixes(get_rotation_matrix(3.1415, 1), get_rotation_matrix(3.1415, 1));
+
+//    std::cout << resulttt[0][0] << " " << resulttt[0][1] << " " << resulttt[0][2] << std::endl;
+//    std::cout << resulttt[1][0] << " " << resulttt[1][1] << " " << resulttt[1][2] << std::endl;
+//    std::cout << resulttt[2][0] << " " << resulttt[2][1] << " " << resulttt[2][2] << std::endl;
 
     gui.init(argc,argv);
 

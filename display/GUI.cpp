@@ -165,6 +165,41 @@ void display()
     draw_distance();
 
     draw_origin();
+
+//    glColor3f(0.7, 0.7, 0.7);
+//    glBegin(GL_TRIANGLES);
+
+//    glVertex3d(model.m_all_vertexes[ model.m_all_faces[10].m_vertexes[0] ].m_x,
+//               model.m_all_vertexes[ model.m_all_faces[10].m_vertexes[0] ].m_y,
+//               model.m_all_vertexes[ model.m_all_faces[10].m_vertexes[0] ].m_z);
+//    glVertex3d(model.m_all_vertexes[ model.m_all_faces[10].m_vertexes[1] ].m_x,
+//               model.m_all_vertexes[ model.m_all_faces[10].m_vertexes[1] ].m_y,
+//               model.m_all_vertexes[ model.m_all_faces[10].m_vertexes[1] ].m_z);
+//    glVertex3d(model.m_all_vertexes[ model.m_all_faces[10].m_vertexes[2] ].m_x,
+//               model.m_all_vertexes[ model.m_all_faces[10].m_vertexes[2] ].m_y,
+//               model.m_all_vertexes[ model.m_all_faces[10].m_vertexes[2] ].m_z);
+
+//    glVertex3d(model.m_all_faces[10].m_point0_new.m_x,
+//               model.m_all_faces[10].m_point0_new.m_y,
+//               model.m_all_faces[10].m_point0_new.m_z);
+//    glVertex3d(model.m_all_faces[10].m_point1_new.m_x,
+//               model.m_all_faces[10].m_point1_new.m_y,
+//               model.m_all_faces[10].m_point1_new.m_z);
+//    glVertex3d(model.m_all_faces[10].m_point2_new.m_x,
+//               model.m_all_faces[10].m_point2_new.m_y,
+//               model.m_all_faces[10].m_point2_new.m_z);
+//    glVertex3d(0.,
+//               model.m_all_faces[10].lines[3][0],
+//               model.m_all_faces[10].lines[3][1]);
+//    glVertex3d(0.,
+//               model.m_all_faces[10].lines[3][2],
+//               model.m_all_faces[10].lines[3][3]);
+//    glVertex3d(0.,
+//               model.m_all_faces[10].lines[3][2],
+//               model.m_all_faces[10].lines[3][3]);
+
+//    glEnd();
+
 //    draw_triangle();
 
 //    glBegin(GL_TRIANGLES);
@@ -239,6 +274,7 @@ void draw_model_by_edges()
 void draw_triangle()
 {
     int i = 0;
+    std::vector<std::vector<double>> rot_matrix;
     Point point0 = {model.m_all_vertexes[model.m_all_faces[i].m_vertexes[0]].m_x,
                 model.m_all_vertexes[model.m_all_faces[i].m_vertexes[0]].m_y,
                 model.m_all_vertexes[model.m_all_faces[i].m_vertexes[0]].m_z};
@@ -250,7 +286,7 @@ void draw_triangle()
     Point point2 = {model.m_all_vertexes[model.m_all_faces[i].m_vertexes[2]].m_x,
                 model.m_all_vertexes[model.m_all_faces[i].m_vertexes[2]].m_y,
                 model.m_all_vertexes[model.m_all_faces[i].m_vertexes[2]].m_z};
-    Point xyz = {0., 0., 0.};
+    Point xyz = {0., 1., 0.};
 
     // calc the angle between two points and Ox
     double alpha = atan((point1.m_y - point0.m_y)/(point1.m_z - point0.m_z));
@@ -287,6 +323,19 @@ void draw_triangle()
     point2_new = multiply_matrix_point( get_rotation_matrix(beta, 3), point2_new );
     xyz_new = multiply_matrix_point( get_rotation_matrix(beta, 3), xyz_new );
 
+    rot_matrix = multiply_matrixes(get_rotation_matrix(gamma, 2), get_rotation_matrix(alpha, 1));
+    rot_matrix = multiply_matrixes(get_rotation_matrix(beta, 3), rot_matrix);
+
+    point0_new =  {point0.m_x - point0.m_x, point0.m_y - point0.m_y, point0.m_z - point0.m_z};
+    point1_new =  {point1.m_x - point0.m_x, point1.m_y - point0.m_y, point1.m_z - point0.m_z};
+    point2_new =  {point2.m_x - point0.m_x, point2.m_y - point0.m_y, point2.m_z - point0.m_z};
+    xyz_new = {xyz.m_x - point0.m_x, xyz.m_y - point0.m_y, xyz.m_z - point0.m_z};
+
+    point0_new = multiply_matrix_point( rot_matrix, point0_new );
+    point1_new = multiply_matrix_point( rot_matrix, point1_new );
+    point2_new = multiply_matrix_point( rot_matrix, point2_new );
+    xyz_new = multiply_matrix_point( rot_matrix, xyz_new );
+
     // points for normals in vertexes
     Point p01, p02, p10, p12, p20, p21; // first number - vertex index, second number - neighbour index
 
@@ -318,10 +367,9 @@ void draw_triangle()
                           {point1_new.m_y, point1_new.m_z, p12.m_y, p12.m_z}};              // 8
 
     std::vector<int> results;
-    for (int i = 0; i < 9; i++)
+    for (int j = 0; j < 9; j++)
     {
-        results.push_back(edge_equation(xyz_new.m_z, xyz_new.m_y, lines[i][1], lines[i][0], lines[i][3], lines[i][2]));
-//            std::cout << results[i] << std::endl;
+        results.push_back(edge_equation(xyz_new.m_z, xyz_new.m_y, lines[j][1], lines[j][0], lines[j][3], lines[j][2]));
     }
 
     if (results[0] > 0 && results[1] > 0 && results[2] > 0) std::cout << abs(xyz_new.m_x) << std::endl;

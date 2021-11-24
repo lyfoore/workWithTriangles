@@ -9,6 +9,14 @@
 
 //extern const int N_CELLS;
 
+class Point
+{
+public:
+    double m_x;
+    double m_y;
+    double m_z;
+};
+
 class Vertex
 {
 public:
@@ -27,6 +35,11 @@ class Face
 public:
     std::vector<int> m_vertexes;
     std::vector<int> m_edges;
+    std::vector<std::vector<double>> m_matrix;
+    std::vector<std::vector<double>> lines;
+    Point m_point0_new;
+    Point m_point1_new;
+    Point m_point2_new;
 };
 
 class Edge
@@ -52,17 +65,11 @@ public:
     void deleting_twins();
     void distribution2D();
     void getEdges();
+    void init_matrixes();
 };
 
 double difference(Vertex a, Vertex b);
 
-class Point
-{
-public:
-    double m_x;
-    double m_y;
-    double m_z;
-};
 
 
 #endif // MODEL_H
