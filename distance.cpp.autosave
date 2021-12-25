@@ -142,7 +142,12 @@ double get_distance(double x, double y, double z)
             results.push_back(edge_equation(xyz_new.m_z, xyz_new.m_y, model.m_all_faces[i].lines[j][1], model.m_all_faces[i].lines[j][0], model.m_all_faces[i].lines[j][3], model.m_all_faces[i].lines[j][2]));
         }
 
-        if (results[0] > epsilon && results[1] > epsilon && results[2] > epsilon) dist_temp = pow(abs(xyz_new.m_x), 2);
+        if (results[0] > 0 && results[1] > 0 && results[2] > 0) dist_temp = pow(abs(xyz_new.m_x), 2);
+        else if (results[0] < 0) 
+        {
+            dist_temp = pow(get_distance_point_line_2D(xyz_new, model.m_all_faces[i].m_point0_new, model.m_all_faces[i].m_point2_new), 2) + pow(xyz_new.m_x, 2);
+            if ()
+        }
 //        else if (results[0] < epsilon && results[4] > epsilon && results[6] < epsilon) dist_temp = pow(get_distance_point_line_2D(xyz_new, model.m_all_faces[i].m_point0_new, model.m_all_faces[i].m_point2_new), 2) + pow(xyz_new.m_x, 2);
 //        else if (results[1] < epsilon && results[5] > epsilon && results[8] < epsilon) dist_temp = pow(get_distance_point_line_2D(xyz_new, model.m_all_faces[i].m_point2_new, model.m_all_faces[i].m_point1_new), 2) + pow(xyz_new.m_x, 2);
 //        else if (results[2] < epsilon && results[7] > epsilon && results[3] < epsilon) dist_temp = pow(get_distance_point_line_2D(xyz_new, model.m_all_faces[i].m_point1_new, model.m_all_faces[i].m_point0_new), 2) + pow(xyz_new.m_x, 2);

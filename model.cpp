@@ -10,9 +10,6 @@
 #include "distance.h"
 
 const double PRECIZE = 0.01 / 100; //0.01%
-double SIZE;
-const int N_CELLS = 100;
-extern double distances2D[N_CELLS][N_CELLS][3];
 
 void Model::load(char *fname)
 {
@@ -157,19 +154,6 @@ double difference(Vertex a, Vertex b)
     return sqrt(pow(b.m_x - a.m_x, 2) +
                 pow(b.m_y - a.m_y, 2) +
                 pow(b.m_z - a.m_z, 2));
-}
-
-
-void Model::distribution2D()
-{
-//    double distr[N_CELLS][N_CELLS][3]; // [3] == [x, y, distance]
-    for (int i = 0; i < N_CELLS; i++) {
-        for (int j = 0; j < N_CELLS; j++) {
-            distances2D[i][j][0] = m_xMin + ((m_xMax - m_xMin) * i) / N_CELLS;
-            distances2D[i][j][1] = m_yMin + ((m_yMax - m_yMin) * j) / N_CELLS;
-//            std::cout << distances2D[i][j][0] << ' ' << distances2D[i][j][1] << std::endl;
-        }
-    }
 }
 
 

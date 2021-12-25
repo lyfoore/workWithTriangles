@@ -9,8 +9,7 @@ public:
     GUI();
     int w,h;
     void init(int argc, char** argv);
-
-
+    void drawDistance();
 };
 
 #endif

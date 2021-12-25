@@ -10,8 +10,8 @@
 
 extern Model model;
 const int N_CELLS = 100;
-extern double distances2D[N_CELLS][N_CELLS][3];
-extern const double Z_PLANE;
+double Z_PLANE;
+double distances2D[N_CELLS][N_CELLS][3];  // [3] == [x, y, distance]
 
 void display();
 
@@ -97,6 +97,35 @@ void keyboardFunc (int key, int x, int y)
         blur_k -= 0.1;
 
     glutPostRedisplay();
+}
+
+
+void getDistribution2D()
+{
+    double x_size = model.m_xMax - model.m_xMin;
+    double y_size = model.m_yMax - model.m_yMin;
+    for (int i = 0; i < N_CELLS; i++) {
+        for (int j = 0; j < N_CELLS; j++) {
+            distances2D[i][j][0] = model.m_xMin + (x_size * i) / N_CELLS;
+            distances2D[i][j][1] = model.m_yMin + (y_size * j) / N_CELLS;
+        }
+    }
+}
+
+//int shetchik = 0;
+
+void GUI::drawDistance()
+{
+    Z_PLANE = (model.m_zMax - model.m_zMin) / 2;
+    getDistribution2D();
+    for (int i = 0; i < N_CELLS; i++)
+    {
+        for (int j = 0; j < N_CELLS; j++)
+        {
+            distances2D[i][j][2] = get_distance(distances2D[i][j][0], distances2D[i][j][1], Z_PLANE);
+        }
+    }
+//    std::cout << shetchik << std::endl;
 }
 
 
@@ -247,7 +276,7 @@ void draw_distance()
     {
         for (int j = 0; j < N_CELLS; j++)
         {
-            glColor3f(1. * distances2D[i][j][2] / model.m_minSize * blur_k, 0., 0.);
+            glColor3d(1. * distances2D[i][j][2] / model.m_minSize * blur_k, 0., 0.);
             glVertex3f(distances2D[i][j][0], distances2D[i][j][1], Z_PLANE);
         }
     }
