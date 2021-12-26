@@ -9,7 +9,9 @@
 
 
 extern Model model;
-
+const int N_CELLS = 100;
+extern double distances2D[N_CELLS][N_CELLS][3];
+extern const double Z_PLANE;
 
 double distance_point_vertex(double x, double y, double z, Vertex vertex)
 {
@@ -21,26 +23,36 @@ double get_distance_point_point(Point point1, Point point2)
     return pow(point1.m_x - point2.m_x, 2) +  pow(point1.m_y - point2.m_y, 2) + pow(point1.m_z - point2.m_z, 2);
 }
 
-//void get_distance_vertex()            // may be optimized
-//{
-//    int n_vertexes = model.m_all_vertexes.size();
-////    double dist_to_vertexes[n_vertexes];
-//    for (int i = 0; i < N_CELLS; i++)
-//    {
-//        for (int j = 0; j < N_CELLS; j++)
-//        {
-//            distances2D[i][j][2] = distance_point_vertex(distances2D[i][j][0], distances2D[i][j][1], Z_PLANE, model.m_all_vertexes[0]);
-//            for (int k = 1; k < n_vertexes; k++)
-//            {
-////                std::cout << distance_point_vertex(distances2D[i][j][0], distances2D[i][j][1], model.m_all_vertexes[k]) << std::endl;
-//                if (distance_point_vertex(distances2D[i][j][0], distances2D[i][j][1], Z_PLANE, model.m_all_vertexes[k]) < distances2D[i][j][2])
-//                    distances2D[i][j][2] = distance_point_vertex(distances2D[i][j][0], distances2D[i][j][1], Z_PLANE, model.m_all_vertexes[k]);
-//            }
-//        }
-//    }
-//}
+void get_distance_vertex()            // may be optimized
+{
+    int n_vertexes = model.m_all_vertexes.size();
+//    double dist_to_vertexes[n_vertexes];
+    for (int i = 0; i < N_CELLS; i++)
+    {
+        for (int j = 0; j < N_CELLS; j++)
+        {
+            distances2D[i][j][2] = distance_point_vertex(distances2D[i][j][0], distances2D[i][j][1], Z_PLANE, model.m_all_vertexes[0]);
+            for (int k = 1; k < n_vertexes; k++)
+            {
+//                std::cout << distance_point_vertex(distances2D[i][j][0], distances2D[i][j][1], model.m_all_vertexes[k]) << std::endl;
+                if (distance_point_vertex(distances2D[i][j][0], distances2D[i][j][1], Z_PLANE, model.m_all_vertexes[k]) < distances2D[i][j][2])
+                    distances2D[i][j][2] = distance_point_vertex(distances2D[i][j][0], distances2D[i][j][1], Z_PLANE, model.m_all_vertexes[k]);
+            }
+        }
+    }
+}
 
-
+void get_distance_field()
+{
+    for (int i = 0; i < N_CELLS; i++)
+    {
+        for (int j = 0; j < N_CELLS; j++)
+        {
+            distances2D[i][j][2] = get_distance(distances2D[i][j][0], distances2D[i][j][1], Z_PLANE);
+//            std::cout << (N_CELLS * i + j) * 100. / (N_CELLS*N_CELLS) << std::endl;
+        }
+    }
+}
 
 
 Point multiply_matrix_point(std::vector<std::vector<double>> A, Point point)
@@ -100,16 +112,17 @@ std::vector<std::vector<double>> get_rotation_matrix(double alpha, int axis)
     return temp;
 }
 
-int edge_equation(double z, double y, double Z1, double Y1, double Z2, double Y2)
+double edge_equation(double z, double y, double Z1, double Y1, double Z2, double Y2)
 {
     // E(x, y) = (z - Z)dY - (y - Y)dZ
     double dZ = Z2 - Z1;
     double dY = Y2 - Y1;
+    double l = sqrt(dZ*dZ + dY*dY);
+    dZ /= l;
+    dY /= l;
     double res = (z - Z1) * dY - (y - Y1) * dZ;
 
-    if (res > 1e-5) return 1; // on the right side
-    else if (res < -1e-5) return -1; // on the left side
-    else if (abs(res) <= 1e-5) return 0; // on line
+    return res;
 }
 
 double get_distance_point_line_2D(Point point, Point line1, Point line2)
@@ -118,39 +131,58 @@ double get_distance_point_line_2D(Point point, Point line1, Point line2)
     double a = (line2.m_y - line1.m_y)/(line2.m_z - line1.m_z);
     double c = line1.m_y - a * line1.m_z;
 
-    return point.m_z + point.m_y;
+    return abs(a * point.m_z + point.m_y + c)/sqrt(1. + a*a);
 }
 
-Point xyz;
-Point xyz_new;;
 double get_distance(double x, double y, double z)
 {
-    double epsilon = 1e-5;
     double dist = 1e15;
     double dist_temp;
-    xyz = {x, y, z};
-
+    Point xyz = {x, y, z};
+    Point xyz_new;
 
     // go over the all triangles
     for (int i = 0; i < model.m_all_faces.size(); i++)
     {
         xyz_new = {x - model.m_all_vertexes[model.m_all_faces[i].m_vertexes[0]].m_x, y - model.m_all_vertexes[model.m_all_faces[i].m_vertexes[0]].m_y, z - model.m_all_vertexes[model.m_all_faces[i].m_vertexes[0]].m_z};
         xyz_new = multiply_matrix_point(model.m_all_faces[i].m_matrix, xyz_new);
-        std::vector<int> results;
+        double x2 = xyz_new.m_x * xyz_new.m_x;
+        double results[9];
         for (int j = 0; j < 3; j++)
         {
-            results.push_back(edge_equation(xyz_new.m_z, xyz_new.m_y, model.m_all_faces[i].lines[j][1], model.m_all_faces[i].lines[j][0], model.m_all_faces[i].lines[j][3], model.m_all_faces[i].lines[j][2]));
+            results[j] = edge_equation(xyz_new.m_z, xyz_new.m_y, model.m_all_faces[i].lines[j][1], model.m_all_faces[i].lines[j][0], model.m_all_faces[i].lines[j][3], model.m_all_faces[i].lines[j][2]);
         }
 
-        if (results[0] > epsilon && results[1] > epsilon && results[2] > epsilon) dist_temp = pow(abs(xyz_new.m_x), 2);
-//        else if (results[0] < epsilon && results[4] > epsilon && results[6] < epsilon) dist_temp = pow(get_distance_point_line_2D(xyz_new, model.m_all_faces[i].m_point0_new, model.m_all_faces[i].m_point2_new), 2) + pow(xyz_new.m_x, 2);
-//        else if (results[1] < epsilon && results[5] > epsilon && results[8] < epsilon) dist_temp = pow(get_distance_point_line_2D(xyz_new, model.m_all_faces[i].m_point2_new, model.m_all_faces[i].m_point1_new), 2) + pow(xyz_new.m_x, 2);
-//        else if (results[2] < epsilon && results[7] > epsilon && results[3] < epsilon) dist_temp = pow(get_distance_point_line_2D(xyz_new, model.m_all_faces[i].m_point1_new, model.m_all_faces[i].m_point0_new), 2) + pow(xyz_new.m_x, 2);
-//        else if (results[4] < epsilon && results[3] > epsilon) dist_temp = get_distance_point_point(model.m_all_faces[i].m_point0_new, xyz_new);
-//        else if (results[5] < epsilon && results[6] > epsilon) dist_temp = get_distance_point_point(model.m_all_faces[i].m_point2_new, xyz_new);
-//        else if (results[7] < epsilon && results[8] > epsilon) dist_temp = get_distance_point_point(model.m_all_faces[i].m_point1_new, xyz_new);
+        double min_dist = 1e15;
+        if (results[0] > 0 && results[1] > 0 && results[2] > 0)
+        {
+            min_dist = x2;
+        }
+        else
+        {
+//            if (results[0] < 0 && results[1] > 0 && results[2] > 0)
+//                min_dist = results[0]*results[0] + x2;
+//            else if (results[0] > 0 && results[1] < 0 && results[2] > 0)
+//                min_dist = results[1]*results[1] + x2;
+//            else if (results[0] > 0 && results[1] > 0 && results[2] < 0)
+//                min_dist = results[2]*results[2] + x2;
+//            std::cout << results[0] << ' ' << results[1] << ' ' << results[2] << std::endl;
+            for (int k = 0; k < 3; k++)
+            {
+                results[k+3] = (x - model.m_all_vertexes[model.m_all_faces[i].m_vertexes[k]].m_x)*(x - model.m_all_vertexes[model.m_all_faces[i].m_vertexes[k]].m_x) +
+                               (y - model.m_all_vertexes[model.m_all_faces[i].m_vertexes[k]].m_y)*(y - model.m_all_vertexes[model.m_all_faces[i].m_vertexes[k]].m_y) +
+                               (z - model.m_all_vertexes[model.m_all_faces[i].m_vertexes[k]].m_z)*(z - model.m_all_vertexes[model.m_all_faces[i].m_vertexes[k]].m_z);
+            }
 
-        if(dist_temp < dist) dist = dist_temp;
+            for (int k = 3; k < 6; k++)
+            {
+                min_dist = fmin(min_dist, fabs(results[k]));
+            }
+        }
+
+
+
+        dist = fmin(dist, min_dist);
     }
     return sqrt(dist);
 }

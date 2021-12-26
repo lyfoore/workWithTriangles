@@ -11,7 +11,7 @@
 extern Model model;
 const int N_CELLS = 100;
 double Z_PLANE;
-double distances2D[N_CELLS][N_CELLS][3];  // [3] == [x, y, distance]
+double distances2D[N_CELLS+1][N_CELLS+1][3];  // [3] == [x, y, distance]
 
 void display();
 
@@ -271,16 +271,32 @@ void timer(int)
 
 void draw_distance()
 {
-    glBegin(GL_POINTS);
-    for (int i = 0; i < N_CELLS; i++)
+//    glBegin(GL_POINTS);
+//    for (int i = 0; i < N_CELLS; i++)
+//    {
+//        for (int j = 0; j < N_CELLS; j++)
+//        {
+//            glColor3d(1. * distances2D[i][j][2] / model.m_minSize * blur_k, 0., 0.);
+//            glVertex3f(distances2D[i][j][0], distances2D[i][j][1], Z_PLANE);
+//        }
+//    }
+//    glEnd();
+
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    for (int i = 0; i < N_CELLS - 1 ; i++)
     {
+        glBegin(GL_TRIANGLE_STRIP);
         for (int j = 0; j < N_CELLS; j++)
         {
             glColor3d(1. * distances2D[i][j][2] / model.m_minSize * blur_k, 0., 0.);
             glVertex3f(distances2D[i][j][0], distances2D[i][j][1], Z_PLANE);
+            glColor3d(1. * distances2D[i+1][j][2] / model.m_minSize * blur_k, 0., 0.);
+            glVertex3f(distances2D[i+1][j][0], distances2D[i+1][j][1], Z_PLANE);
         }
+        glEnd();
     }
-    glEnd();
+
 }
 
 void draw_model_by_edges()
