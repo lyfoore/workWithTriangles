@@ -146,43 +146,21 @@ double get_distance(double x, double y, double z)
     {
         xyz_new = {x - model.m_all_vertexes[model.m_all_faces[i].m_vertexes[0]].m_x, y - model.m_all_vertexes[model.m_all_faces[i].m_vertexes[0]].m_y, z - model.m_all_vertexes[model.m_all_faces[i].m_vertexes[0]].m_z};
         xyz_new = multiply_matrix_point(model.m_all_faces[i].m_matrix, xyz_new);
-        double x2 = xyz_new.m_x * xyz_new.m_x;
         double results[9];
-        for (int j = 0; j < 3; j++)
+        for (int j = 0; j < 9; j++)
         {
             results[j] = edge_equation(xyz_new.m_z, xyz_new.m_y, model.m_all_faces[i].lines[j][1], model.m_all_faces[i].lines[j][0], model.m_all_faces[i].lines[j][3], model.m_all_faces[i].lines[j][2]);
         }
 
-        double min_dist = 1e15;
-        if (results[0] > 0 && results[1] > 0 && results[2] > 0)
-        {
-            min_dist = x2;
-        }
-        else
-        {
-//            if (results[0] < 0 && results[1] > 0 && results[2] > 0)
-//                min_dist = results[0]*results[0] + x2;
-//            else if (results[0] > 0 && results[1] < 0 && results[2] > 0)
-//                min_dist = results[1]*results[1] + x2;
-//            else if (results[0] > 0 && results[1] > 0 && results[2] < 0)
-//                min_dist = results[2]*results[2] + x2;
-//            std::cout << results[0] << ' ' << results[1] << ' ' << results[2] << std::endl;
-            for (int k = 0; k < 3; k++)
-            {
-                results[k+3] = (x - model.m_all_vertexes[model.m_all_faces[i].m_vertexes[k]].m_x)*(x - model.m_all_vertexes[model.m_all_faces[i].m_vertexes[k]].m_x) +
-                               (y - model.m_all_vertexes[model.m_all_faces[i].m_vertexes[k]].m_y)*(y - model.m_all_vertexes[model.m_all_faces[i].m_vertexes[k]].m_y) +
-                               (z - model.m_all_vertexes[model.m_all_faces[i].m_vertexes[k]].m_z)*(z - model.m_all_vertexes[model.m_all_faces[i].m_vertexes[k]].m_z);
-            }
+        if (results[0] > 0 && results[1] > 0 && results[2] > 0) dist_temp = xyz_new.m_x * xyz_new.m_x;
+        else if (results[0] < 0 && results[4] > 0 && results[6] < 0) dist_temp = pow(results[0], 2) + pow(xyz_new.m_x, 2);
+        else if (results[1] < 0 && results[5] > 0 && results[8] < 0) dist_temp = pow(results[1], 2) + pow(xyz_new.m_x, 2);
+        else if (results[2] < 0 && results[7] > 0 && results[3] < 0) dist_temp = pow(results[2], 2) + pow(xyz_new.m_x, 2);
+        else if (results[4] < 0 && results[3] > 0) dist_temp = get_distance_point_point(model.m_all_faces[i].m_point0_new, xyz_new);
+        else if (results[5] < 0 && results[6] > 0) dist_temp = get_distance_point_point(model.m_all_faces[i].m_point2_new, xyz_new);
+        else if (results[7] < 0 && results[8] > 0) dist_temp = get_distance_point_point(model.m_all_faces[i].m_point1_new, xyz_new);
 
-            for (int k = 3; k < 6; k++)
-            {
-                min_dist = fmin(min_dist, fabs(results[k]));
-            }
-        }
-
-
-
-        dist = fmin(dist, min_dist);
+        if (dist_temp < dist) dist = dist_temp;
     }
     return sqrt(dist);
 }

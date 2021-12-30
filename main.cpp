@@ -29,7 +29,7 @@ int main(int argc, char **argv)
     model.getMinMax();
     std::cout << "x_min - " << model.m_xMin << std::endl;
     std::cout << "before deleting twins - " << model.m_all_vertexes.size() << std::endl;
-    model.deleting_twins();
+//    model.deleting_twins();
     std::cout << "after deleting twins - " << model.m_all_vertexes.size() << std::endl;
     std::cout << "init started" << std:: endl;
     model.init_matrixes();

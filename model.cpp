@@ -303,18 +303,20 @@ void Model::init_matrixes()
         m_all_faces[i].m_point2_new = point2_new;
 
         // get normal equations
-        k02 = (point2_new.m_y - point0_new.m_y)/(point2_new.m_z - point0_new.m_z);
-        k02 = 1/k02 * (-1);
+        p02 = {0., point2_new.m_z, -point2_new.m_y};
+        p20 = {0., p02.m_y + point2_new.m_y, p02.m_z + point2_new.m_z};
 
-        p02 = {0., -0.5 * k02, -0.5};
-        p20 = {0., (point2_new.m_z - 0.5) * k02 + point2_new.m_y - k02 * point2_new.m_z, point2_new.m_z - 0.5};
-
-        k12 = (point2_new.m_y - point1_new.m_y)/(point2_new.m_z - point1_new.m_z);
-        k12 = 1/k12 * (-1);
-
-        p21 = {0., (point2_new.m_z + 0.5) * k12 + point2_new.m_y - k12 * point2_new.m_z, point2_new.m_z + 0.5};
-        p12 = {0., (point1_new.m_z + 0.5) * k12 + point1_new.m_y - k12 * point1_new.m_z, point1_new.m_z + 0.5};
-
+        if (point1_new.m_z >= point2_new.m_z)
+        {
+            p21 = {0., point2_new.m_z - point1_new.m_z, point1_new.m_y - point2_new.m_y};
+        }
+        else
+        {
+            p21 = {0., point1_new.m_z - point2_new.m_z, point2_new.m_y - point1_new.m_y};
+        }
+        p12 = {0., p21.m_y, p21.m_z};
+        p21 = {0., p21.m_y - point1_new.m_y, p21.m_z - point1_new.m_z};
+        p12 = {0., p21.m_y + point2_new.m_y, p21.m_z + point2_new.m_z};
         // for z-axis k = 0
         p01 = {0., point0_new.m_y - 0.5, point0_new.m_z};
         p10 = {0., point1_new.m_y - 0.5, point1_new.m_z};
